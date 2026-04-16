@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AKS – Schüleraufnahme</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --border: #d8d3c8;
+    --border-focus: #1a3a5c;
+    --text: #1a1a18;
+    --text-muted: #6b6860;
+    --accent: #1a3a5c;
+    --accent-light: #e8eef5;
+    --accent2: #8b1a1a;
+    --success: #1a5c3a;
+    --success-bg: #e8f5ee;
+    --warn: #5c3a1a;
+    --warn-bg: #f5ede8;
+    --step-done: #1a5c3a;
+    --step-active: #1a3a5c;
+    --step-todo: #d8d3c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    background: #ffffff;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .aks-badge {
+    background: #fff;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .topbar h1 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-icon {
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .btn-icon:hover { background: #d0dfee; }
+
+  /* ─── MAIN WRAPPER ─── */
+  .main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px 16px;
+    margin-bottom: 20px;
+  }
+  .page-header h2 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .meta-field label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .meta-field input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .meta-field input:focus { outline: none; border-color: var(--border-focus); background: #fff; }
+  .meta-field input[readonly] { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+
+  /* ─── STEP INDICATOR ─── */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .step-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    border: 2px solid var(--step-todo);
+    background: #fff;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .step-dot.done { background: var(--step-done); border-color: var(--step-done); color: #fff; cursor: pointer; }
+  .step-dot.active { background: var(--step-active); border-color: var(--step-active); color: #fff; cursor: default; }
+  .step-line {
+    width: 32px;
+    height: 2px;
+    background: var(--step-todo);
+    transition: background 0.2s;
+  }
+  .step-line.done { background: var(--step-done); }
+  .step-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .step-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ─── CARD SECTION ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 20px 16px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .field-grid {
+    display: grid;
+    gap: 14px;
+  }
+  .fg-2 { grid-template-columns: 1fr 1fr; }
+  .fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .fg-1 { grid-template-columns: 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    background: #fafaf8;
+    color: var(--text);
+    transition: border-color 0.15s, background 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    background: #fff;
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+
+  /* ─── RADIO / CHECKBOX GROUPS ─── */
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .radio-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    background: #fafaf8;
+  }
+  .radio-pill:has(input:checked) {
+    background: var(--accent-light);
+    border-color: var(--border-focus);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .radio-pill input { display: none; }
+
+  .checkbox-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    background: #fafaf8;
+    transition: all 0.15s;
+  }
+  .checkbox-pill:has(input:checked) {
+    background: var(--accent-light);
+    border-color: var(--border-focus);
+    color: var(--accent);
+  }
+  .checkbox-pill input { width: 14px; height: 14px; }
+
+  /* ─── INLINE TEXT INPUT IN RADIO ─── */
+  .inline-input {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    font-size: 13px;
+    padding: 0 2px;
+    width: 120px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+  }
+  .inline-input:focus { outline: none; border-bottom-color: var(--border-focus); }
+
+  /* ─── NAVIGATION BUTTONS ─── */
+  .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
+  }
+  .btn {
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #122840; }
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger {
+    background: #fff;
+    color: var(--accent2);
+    border-color: #d8b0b0;
+  }
+  .btn-save {
+    background: var(--success);
+    color: #fff;
+    border-color: var(--success);
+    padding: 12px 32px;
+    font-size: 15px;
+  }
+  .btn-save:hover { background: #134a2e; }
+
+  .step-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* ─── SIGNATURE ─── */
+  .sig-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    position: relative;
+  }
+  .sig-wrap canvas {
+    display: block;
+    width: 100%;
+    touch-action: none;
+  }
+  .sig-tools {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .sig-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    font-style: italic;
+  }
+
+  /* ─── CONFIRMATION ─── */
+  .confirm-box {
+    background: var(--success-bg);
+    border: 1px solid #a8d5bc;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .confirm-box .check-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .confirm-box h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    color: var(--success);
+    margin-bottom: 6px;
+  }
+  .confirm-box p { font-size: 14px; color: var(--text-muted); }
+
+  /* ─── ADMIN PANEL ─── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 200;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .overlay.open { display: flex; }
+  .overlay-panel {
+    background: var(--card);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    padding: 24px;
+    position: relative;
+  }
+  .overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .overlay-header h2 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 20px;
+    color: var(--accent);
+  }
+  .close-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+  }
+
+  .archive-item {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    background: #fafaf8;
+  }
+  .archive-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .archive-item-name { font-weight: 500; font-size: 15px; }
+  .archive-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  .archive-detail {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 14px;
+    border: 1px solid var(--border);
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    font-size: 13px;
+  }
+  .detail-row { display: flex; flex-direction: column; gap: 2px; }
+  .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .detail-value { font-weight: 500; color: var(--text); word-break: break-word; }
+
+  .sig-preview {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    max-width: 100%;
+    max-height: 80px;
+    margin-top: 6px;
+    background: #fff;
+  }
+
+  /* ─── LOGIN ─── */
+  .login-wrap {
+    max-width: 340px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .login-wrap h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .topbar, .steps, .nav-bar, .btn, .sig-tools, .sig-hint { display: none !important; }
+    body { background: #fff; font-size: 11px; }
+    .card { border: 1px solid #ccc; margin-bottom: 10px; page-break-inside: avoid; }
+    .main { max-width: 100%; padding: 0; }
+    .page-header { border: 1px solid #ccc; }
+  }
+
+  @media (max-width: 520px) {
+    .fg-2, .fg-3 { grid-template-columns: 1fr; }
+    .meta-row { grid-template-columns: 1fr; }
+  }
+
+  .section-hidden { display: none; }
+
+  /* ─── VALIDATION ERRORS ─── */
+  .field-error input,
+  .field-error select,
+  .field-error textarea {
+    border-color: #c0392b !important;
+    background: #fff5f5 !important;
+  }
+  .field-error label {
+    color: #c0392b !important;
+  }
+  .field-error .radio-group {
+    outline: 2px solid #c0392b;
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+  .konfession-extra {
+    display: none;
+    margin-top: 10px;
+  }
+  .konfession-extra.visible { display: flex; align-items: center; gap: 8px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB7AOUDASIAAhEBAxEB/8QAHQABAAIDAQEBAQAAAAAAAAAAAAYIBQcJBAMCAf/EAEgQAAAFAgIDBhIKAQUBAAAAAAABAgMEBQYHEQgSIRMxNkFRVQkUFhciNTdhc3R1gZGSobGywRUYMjhSU1ZxlNFCJDNDYoJy/8QAHAEBAAIDAQEBAAAAAAAAAAAAAAMHBAUIAgEG/8QANREAAgEDAAcDCgcBAAAAAAAAAAECAwQFBhFBUXFysSEx0RIUFSIyNDVCYZITFjNSU2KRwf/aAAwDAQACEQMRAD8AuWAAAAAAAAAAAAAAKK6R+AmKV4Yx164KPRilU+S6Rx3FPkWaSIuI94a7+q7jJ+m2/wCQkdLgAHNH6ruMn6bb/kJD6ruMn6bb/kJHS4ABzR+q7jJ+m2/5CRra/wCzq/YlxroFyRSiVBttLqmyWSskq2keZDruOcmnt94ab5PjfCYAvlhEZqwvto1GZmdNZzM//ghKRFcIe5dbPk1n4CEqAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABpa/rquCBdk6JEqj7LDa8kISZZFsGB6trp56k+kv6H0xN4b1LwnyEaFJ5LIXcbyrGNWSSk9r3nO2Xyt9C/rRjWkkpS+Z739SQ9W1089SfSX9DJ2rd1ySrjgR5FWkONOPElaTMsjIQsZiyuFdN8YSI7PI3crimnVl3ra9/EhsMtfyuqSdaWryl8z3r6lkBzk09vvDTfJ8b4THRsc5NPb7w03yfG+ExeB0eXxwh7l1s+TWfgISoRXCHuXWz5NZ+AhKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV8xN4b1LwnyEaE3xDoNZlXhPfjU6Q60teaVpTmR7BH+pmv80yvUFH5O0ryvKrUH7T2Pec45ixupZCu1Tk15Utj3sxAzFlcK6b4wkfzqZr/NMr1BlbSt6tsXNT3nqZJQ2h9JqUaNhEI7OzuFcU26b71se8hx9hdK7pN0pe0tj3r6G/Bzk09vvDTfJ8b4THRsUK01cP71uLHSXUqHbNSqENUGOgnmGjUkzJJ5lmL0OlC5eEPcutnyaz8BCVCOYYRJMDDq34cxlbEhmnsocbWWRpUSSzIxIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABqWo4pVOLUJEZNOiqS04pBGaj25HkPP12arzZE9ZQg1e7dzvGF/EY8QpmtpHk41JJVn3vd4HPtfS3Mxqyiq71JvYvA2N12arzZE9ZQzlkYgT69cDVNfhR2kLSozUhR57Bp0S/CDhvG8Gv3DKxefyNa9pU51W05JPu38DOwulGWr5CjSqV24ykk12d2vgS27cRqhRrglU1mBHcQyrVJSlHmYxPXZqvNkT1lCPYm8N6l4T5CNDxkNIclSuqkIVWkpNLu38CLKaU5eje1qcK7SUpJd3cnwNjddmq82RPWUPdQMTalUazEguU+MhD7hINRKPMsxqsZiyuFdN8YSI7TSLJzrwjKs9Ta3b+BFZaV5ipc04SrtpySfdv4FkAABcZfwAAAAAAAAAAAAAAAAAAAH5dcbZbNx1xDaE7TUo8iLzjDruy1kPbiu46Qlz8JzG8/eAM0A88KfBmp1oUyPJTytOksvYY9AAAAAAAAAAAAArJXu3c7xhfxGPEPfXW3Ppqb2Cv8AfXxf9jHj3Nz8tXoHP9dP8WXFnLlzF/jT7Nr6n4Evwg4bxvBr9wie5uflq9Al2ESFle0YzQoi3Ne+XeGbhk/SFHmXU2Oj8X6Ut+ePU8eJvDepeE+QjQk+JiFne1SMkKMt05O8I3ubn5avQI8on57W5pdSLNRfpGvzy6s/AzFlcK6b4wkYrc3Py1egZey21lddNM0KIt3TxCKyT85p8y6kGOi/O6XZ80eqLHAAC/Dp4+M+UzCgvzJCiQyw2pxaj4kpLM/cOWOJeJV23Jf9drEOvVZmO9KcW22xJWlCGyPIsiI8iLIiF8NMa8epHBCqmy7qTKllCYyPI+y+0ZfsQrTob4VsXnZV81OewS0yISoEM1FvOGWsZl5yIgBu3QMvuTdOGcujVSa7KqFJkmRreWalqbXtSZme08t4WNHOzQquV6ycejt6es2mqlrwHkmeRE6kz1faRjomAIJpByJETBS7JMV5xh5unLUhxtRpUk9m0jLeFSdAe4q9VcYJUep1qoTWSpziibfkLWnPPfyMxbHSO7hd4eTXPkKddDz7tEvya57yAHQUan0kcZKVhTai3CW3IrspJpgxM9uf41ciSGZxzxQomFtnPVmpOJclrI0wohK7J5zi8xcZikWGlmXlpJYqSLguB55FLS7rTJO3UbRnsab7+QAzejtaeI+NF7SLhrdyVuNQUP7rMeRJWhLqs89zbIjy9G8QuhiNd1Cwtw8frVQNRRILRNsNa2a3V5ZJSRntMz5RnLSt6kWrb8ShUOG3EgxUEhttBZec+Uz5RVPoktSlopdrUlBrKK6648vLeUoiyIgBpe4b9xfx9vBdNoypymFKM2oENZoZZRnvrMveYksfQ9xUfYTIkVCktPmWZoVJNRl5xuzoeVLpjGEMyqsNN/SEmoOIkOf5aqctUv2FmABzSunDDHPCdX0mkqqzHaPPpqnSVONp75kX9C3ehffFy31hc9Puicc2ZGmKYS6pJEo0kX+XKY3g62h1tTbqErQoslJUWZGXfIYi17XoVspmIoVPagtzHzfebaLJJrPfMi4gBmQAABrrrs0nm2V6xB12aTzbK9YhpwBUH5wyn71/iKG/PuZ/evtRuPrs0nm2V6xDO2bekK5pb0aNFeZU0glmazI89uQr+Nj4D9u5/i5fENphdJshd31OjVkvJb7exbmbrR7TDKX2SpW9aacZPt7FuZmp2Itvx5jzDlEUpbbhpUrVRtMj394fHrl25zCr1Ef0NY17t3O8YX8RjxDWVdKshGpJJrvfyo01fTXKwqyinHsb+VeBtvrl25zCr1Ef0Mrad7Uas1puBDpSo7q0mZLNKSyy/YaPEvwg4bxvBr9wysZpLf17ylTm1qckn6q3mbh9L8lc39GjUcdUpJP1VtZPLkvuiUqtSIEmkKfeaVkpeqnb6Rj+uXbnMKvUR/QhOJvDepeE+QjQjv8ASa/pXVSnFrUpNeytjI8npjk6F5VpQcdUZNL1VsZtvrl25zCr1Ef0PXR8QKDOqkaGzRlNuOuElK9VOw+UaZGYsrhXTfGEjxa6UZCpXhBtam0vZW8is9M8pVuKcJOOptL2VtfAsgADz1KWzT6fJnSFElmO0p1wz4kpLM/cLbL0KM9EQvA6nfVKs6M7rM0xndnkpP8A5V73nyFn9F20SszBSg01bepJfZ6akbNprc2+7IUBlV+mXvpBqr9zVBuHS5dX3V990+xQylWz2EXpF9WNIPBdhhtlq96alttJJSktbYRFkRbwApppVUKRhzpGP1enpNlqQ+3U4pp2FnmRqIvOXtHQewa+xdFl0i4IyyW3OiIezLlMtvtzFNNOO8sNr/odFqlrXLCqFVguqaW03nrKaVt4y4jG0Oh9Xj9NYXSrZfd1pNGkZIIz27kvaXmI9gA2vpHdwu8PJrnyFEtES+aLh5e9WuWuO6rDFLcJtsvtOrP7KC75i9ukd3C7w8mufIc69H3DR/FPEOPbqJSYsZKTelO/5E2nf1S5TAEsgvXJpM46NR6lUW4cdwzUhpbnYx46T2pQXGrIdCrBtGiWRbES3qBERGhxkEWwuyWfGpR8ZmOcWMVg3LgPiiw/TpL6Y6HemKXPTs10kf2T75bxkL1aOOLVNxVslqclaGqxFSTdQjZ7Ur/ERfhMAbRGh9NTDOdiBhqiXRmDfqtHcOQ00nfdQZZKSXfy2jfAADmNo/413Fg3V5UXpI5lMkL/ANXBdM0KSotmsnkULcWdpbYV1tLaKlIm0SQrfTJazQX/ALLYJXifo/4a3++5NqdGKHUHNqpcM9zWo+VRFsMaFvHQmdSS3bUu5K+NLM5nI/21kgC2drXha90xyft6vQKigyzyYeI1ejfGdHLC97GxKwTuGPInFJpbxqzjzYjpm24Zcii2eYxd3RBxhkYoWc/FrSkfTtLNKJCk7N2Qf2V5cvKAN5AAACq4AA55OVANj4D9u5/i5fENcDY+A/buf4uXxDeaNfFKPH/jP0miHxq34voyC17t3O8YX8RjxD217t3O8YX8RjxDUV/1ZcWaK5/WnxfUCX4QcN43g1+4RAS/CDhvG8Gv3DNw3xCjzLqbHR74pb88ep5cTeG9S8J8hGhJcTeG9S8J8hGhHlPfa3NLqRZr4jX55dWBmLK4V03xhIw4zFlcK6b4wkRWXvNPmXUgx3vdLmj1RZAaW0zrx6ksEKmhl3c5lVMoTGR5Hkr7Rl+xDdIoZ0Q68fpTEGm2jHc1mKUxurqSPZuq/mRC/Tp8hWjZgDKxep1UqLlXOlRITiWkL3LX3RRlmZeYbe+pC3+uFfxRvLRMtErPwQokRxvUlTG+nJGZbdZe0i9GQ2wAKW1PQnXHp0mRHvNTzzTSltt9LZa6iIzIvONb6Fl0O2Xjw3RZyzZZqWvAfSo8iJwj7HPzkOjQ5paUdAfw70iZs2Ag2WnZLdSimWwtp6xkXnI/SAL26R3cLvDya58hTroefdol+TXPeQtNiVcLF16KdXuKOolInULdTMvxGRZ+3MVZ6Hn3aJfk1z3kALnY1Yc0fE2yJVv1RtKXTI1xJGXZMukWwy73KOeNt1e8dH3GFZPNuMyYTu5ymDzJEpnP2kZbSMdRRovS2wWj4l2mqq0phCLkpzZqjrIsjfQW02z+QA2lhzeNGvu0YVyUOQl2NJQRmnPsm1caVchkMyqfCTUU05Upkpim91Syai1zRnlrEXJmOcWi/i7UsIr5XR62TyaHKe3GfHXnnHXnlrkXEZcY2rpzV2v069bLvezpctuOinLU3UImZt7VkZEZls2lxGALogKT4baaM2LGah3zb/TikkRHLhKJKld9ST2egbEf0ysMkRzW3BrLjhFsb3EizPkzAEp02INPl6P1admttm5GUhyOpW+lzPZkK9dDhRLPEe4FtZ9LFTkk7yGevsESx9x1uTGyZFtmh0h+JS92I2obfZuvr4jVl7ha/RCwlewxsJbtXQkq5VTJ2Un8pOXYo83GAN3AAACO9RFrczR/aHURa3M0f2iRAMH0ZZ/xR+1eBrvQ+P8A4IfavAjvURa3M0f2j3Ue36PSHlu02C1HWtOqo08ZDKAPdOwtaclKFOKa2pI90sZZUpqdOjFNbVFJ9DAPWZbLzq3XKQwpa1GpRnntMx+Ooi1uZo/tEiAeXjbNvW6UftXgeHiLBvW6EPtXgR3qItbmaP7R6qZa9BpktMuDTWWH0kZEtOeZZjMAPsMfaQkpRpRTX0R6hirGnJShRimtqivAwtQtS358tyXLpjLr7h5rWrPMx5+oi1uZo/tEiAJY60k3KVKLb+iE8VYzk5Soxbf9V4Ed6iLW5mj+0fWJaFtxZLcmPSmG3W1ayFFnmRjOgPix1nF61Sj/AIj5HE2EWmqMda/qvADX9w4MYY3BXn67WbRgTajIWTjr7msalK5d8bAAZpsD5xmWo8duOwgm2mkEhCS3kpIsiIfQAAARC+8MrEvmaxNuu24dUkR0G2048R5pSZ55bDEvAAR6FZVrw7MXZ0akMN0FbZtKhFnqGg98t/eGLsnCrD+yqqqqWvbMOmTFNm2p1ojzNJ75bTE1AAAAABr24sE8LbhrMisVizKbKnSVazzqkmRrPlPIxJ6Radu0q227ch0mMmktEaURVp10JI+LJWYzYADT12aNWENxSFSHrb6RdUealQnTazP9iEXb0PcKEyTcUdYW3+X03l7chYkABBMOcIsPrAPdLbt6OxJyyOS4W6On/wCjE7AAAAAAH//Z" alt="AKS Logo" style="height:38px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;">
+    <h1>Schüleraufnahme</h1>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-icon" onclick="openAdmin()">Admin</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="app">
+
+  <!-- ────────────────────────────── FORM VIEW ────────────────────────────── -->
+  <div id="form-view">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h2>Schüleraufnahme</h2>
+      <div class="meta-row">
+        <div class="meta-field">
+          <label>Schuljahr</label>
+          <input type="text" id="schuljahr" readonly>
+        </div>
+        <div class="meta-field">
+          <label>Klasse</label>
+          <input type="text" id="klasse" placeholder="z. B. 1BFR1" maxlength="10">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP INDICATORS -->
+    <div class="steps" id="steps-bar"></div>
+
+    <!-- ══ STEP 1: Grunddaten ══ -->
+    <div class="step-section" data-step="1">
+      <div class="card">
+        <div class="card-title">Schüler/-in – Grunddaten</div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Familienname*</label><input type="text" id="f_name" placeholder="Nachname" required></div>
+          <div class="field"><label>Vorname*</label><input type="text" id="f_vorname" placeholder="Vorname" required></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Geboren am*</label><input type="date" id="f_geb_am" required></div>
+          <div class="field"><label>Geboren in (Ort)*</label><input type="text" id="f_geb_ort" placeholder="Geburtsort"></div>
+        </div>
+        <div class="field-grid fg-3" style="margin-bottom:14px">
+          <div class="field"><label>Geburtsland*</label><input type="text" id="f_geburtsland" placeholder="z. B. Deutschland"></div>
+          <div class="field"><label>Muttersprache*</label><input type="text" id="f_muttersprache" placeholder="z. B. Deutsch"></div>
+          <div class="field"><label>Staatsangehörigkeit*</label><input type="text" id="f_staatsa" placeholder="z. B. deutsch"></div>
+        </div>
+        <div class="field-grid fg-2">
+          <div class="field">
+            <label>Geschlecht*</label>
+            <div class="radio-group">
+              <label class="radio-pill"><input type="radio" name="geschlecht" value="männlich"> männlich</label>
+              <label class="radio-pill"><input type="radio" name="geschlecht" value="weiblich"> weiblich</label>
+              <label class="radio-pill"><input type="radio" name="geschlecht" value="divers"> divers</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Konfession*</label>
+            <div class="radio-group" id="konfession-group">
+              <label class="radio-pill"><input type="radio" name="konfession" value="römisch-katholisch" onchange="toggleKonfessionExtra()"> röm.-kath.</label>
+              <label class="radio-pill"><input type="radio" name="konfession" value="evangelisch" onchange="toggleKonfessionExtra()"> evangelisch</label>
+              <label class="radio-pill"><input type="radio" name="konfession" value="sonstige" onchange="toggleKonfessionExtra()"> Sonstige</label>
+            </div>
+            <div class="konfession-extra" id="konfession-extra">
+              <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">Konfession angeben:</label>
+              <input type="text" id="konfession_sonstige" placeholder="Bitte eintragen …" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafaf8">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: Anschrift ══ -->
+    <div class="step-section section-hidden" data-step="2">
+      <div class="card">
+        <div class="card-title">Schüler/-in – Anschrift</div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Wohnart</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="wohnart" value="Wohnung" checked> Wohnung</label>
+            <label class="radio-pill"><input type="radio" name="wohnart" value="Wohnheim"> Wohnheim</label>
+          </div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field" style="grid-column:1/-1"><label>Straße und Hausnummer*</label><input type="text" id="s_strasse" placeholder="Musterstraße 12"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>PLZ*</label><input type="text" id="s_plz" placeholder="75175" maxlength="10"></div>
+          <div class="field"><label>Ort*</label><input type="text" id="s_ort" placeholder="Pforzheim"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Telefon*</label><input type="tel" id="s_tel" placeholder="+49 …"></div>
+          <div class="field"><label>Mobil*</label><input type="tel" id="s_mobil" placeholder="+49 …"></div>
+          <div style="grid-column:1/-1;font-size:11px;color:var(--text-muted);margin-top:-6px">* Mindestens Telefon oder Mobil muss angegeben werden.</div>
+        </div>
+        <div class="field"><label>E-Mail*</label><input type="email" id="s_email" placeholder="name@beispiel.de"></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: Erziehungsberechtigte ══ -->
+    <div class="step-section section-hidden" data-step="3">
+      <div class="card">
+        <div class="card-title">Erziehungsberechtigte / Ansprechpartner</div>
+        <div class="field" style="margin-bottom:14px">
+          <label>Status Schüler/-in</label>
+          <div class="radio-group" id="vj-status">
+            <label class="radio-pill"><input type="radio" name="vj_status" value="minderjährig" checked> minderjährig</label>
+            <label class="radio-pill"><input type="radio" name="vj_status" value="volljährig"> volljährig</label>
+          </div>
+        </div>
+        <!-- Minderjährig: Erziehungsberechtigte -->
+        <div id="vj-mj-options" class="field" style="margin-bottom:14px">
+          <label>Erziehungsberechtigte</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="erz_art" value="beide Elternteile"> beide Elternteile</label>
+            <label class="radio-pill"><input type="radio" name="erz_art" value="nur Vater"> nur Vater</label>
+            <label class="radio-pill"><input type="radio" name="erz_art" value="nur Mutter"> nur Mutter</label>
+            <label class="radio-pill"><input type="radio" name="erz_art" value="Vormund"> Vormund</label>
+            <label class="radio-pill"><input type="radio" name="erz_art" value="Sonstige"> Sonstige: <input class="inline-input" type="text" id="erz_sonstige" placeholder="…" onclick="document.querySelector('[name=erz_art][value=Sonstige]').checked=true"></label>
+          </div>
+        </div>
+        <!-- Volljährig: Ansprechpartner -->
+        <div id="vj-vj-options" class="field" style="margin-bottom:14px;display:none">
+          <label>Ansprechpartner</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="ansp_art" value="Vater" onchange="toggleAnspSonstige()"> Vater</label>
+            <label class="radio-pill"><input type="radio" name="ansp_art" value="Mutter" onchange="toggleAnspSonstige()"> Mutter</label>
+            <label class="radio-pill"><input type="radio" name="ansp_art" value="Sonstige" onchange="toggleAnspSonstige()"> Sonstige</label>
+          </div>
+          <div id="ansp-sonstige-wrap" style="display:none;margin-top:10px">
+            <label style="font-size:12px;color:var(--text-muted)">Ansprechpartner angeben:</label>
+            <input type="text" id="ansp_sonstige" placeholder="Bitte eintragen …" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:7px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fafaf8;color:var(--text);">
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Erziehungsberechtigte -->
+      <div class="card">
+        <div class="card-title">1. Erziehungsberechtigte/-r oder Ansprechpartner/-in</div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Familienname*</label><input type="text" id="e1_name" placeholder="Nachname"></div>
+          <div class="field"><label>Vorname*</label><input type="text" id="e1_vorname" placeholder="Vorname"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Geschlecht*</label>
+          <div class="radio-group" id="e1-geschl-group">
+            <label class="radio-pill"><input type="radio" name="e1_geschl" value="männlich"> männlich</label>
+            <label class="radio-pill"><input type="radio" name="e1_geschl" value="weiblich"> weiblich</label>
+            <label class="radio-pill"><input type="radio" name="e1_geschl" value="divers"> divers</label>
+          </div>
+        </div>
+        <div class="field-grid fg-1" style="margin-bottom:14px">
+          <div class="field"><label>Straße und Hausnummer*</label><input type="text" id="e1_strasse" placeholder="Musterstraße 12"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>PLZ*</label><input type="text" id="e1_plz" placeholder="75175"></div>
+          <div class="field"><label>Ort*</label><input type="text" id="e1_ort" placeholder="Pforzheim"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Telefon*</label><input type="tel" id="e1_tel"></div>
+          <div class="field"><label>Mobil*</label><input type="tel" id="e1_mobil"></div>
+          <div style="grid-column:1/-1;font-size:11px;color:var(--text-muted);margin-top:-6px">* Mindestens Telefon oder Mobil muss angegeben werden.</div>
+        </div>
+        <div class="field"><label>E-Mail*</label><input type="email" id="e1_email"></div>
+      </div>
+
+      <!-- 2. Erziehungsberechtigte (optional) -->
+      <div class="card">
+        <div class="card-title">2. Erziehungsberechtigte/-r <span style="font-size:12px;color:var(--text-muted);font-weight:400">(optional)</span></div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Familienname</label><input type="text" id="e2_name" placeholder="Nachname"></div>
+          <div class="field"><label>Vorname</label><input type="text" id="e2_vorname" placeholder="Vorname"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Geschlecht</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="e2_geschl" value="männlich"> männlich</label>
+            <label class="radio-pill"><input type="radio" name="e2_geschl" value="weiblich"> weiblich</label>
+            <label class="radio-pill"><input type="radio" name="e2_geschl" value="divers"> divers</label>
+          </div>
+        </div>
+        <div class="field-grid fg-1" style="margin-bottom:14px">
+          <div class="field"><label>Straße und Hausnummer</label><input type="text" id="e2_strasse"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>PLZ</label><input type="text" id="e2_plz"></div>
+          <div class="field"><label>Ort</label><input type="text" id="e2_ort"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Telefon</label><input type="tel" id="e2_tel"></div>
+          <div class="field"><label>Mobil</label><input type="tel" id="e2_mobil"></div>
+        </div>
+        <div class="field"><label>E-Mail</label><input type="email" id="e2_email"></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: Schulische Vorbildung ══ -->
+    <div class="step-section section-hidden" data-step="4">
+      <div class="card">
+        <div class="card-title">Schulischer Werdegang</div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Eintritt AKS am*</label><input type="date" id="aks_eintritt"></div>
+          <div class="field"><label>In Klasse*</label><input type="text" id="aks_klasse_ein" readonly style="background:var(--accent-light);color:var(--accent);font-weight:500" placeholder="Wird aus Kopfzeile übernommen"></div>
+        </div>
+        <div class="field-grid fg-2" style="margin-bottom:14px">
+          <div class="field"><label>Letzte besuchte Schule*</label><input type="text" id="schule_name" placeholder="Schulname"></div>
+          <div class="field"><label>Ort*</label><input type="text" id="schule_ort"></div>
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label>Art der Schule*</label>
+          <div class="radio-group" style="flex-wrap:wrap">
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Hauptschule/Werkrealschule"> Hauptschule/WRS</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Realschule"> Realschule</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="SBBZ"> SBBZ</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Gemeinschaftsschule"> Gemeinschaftsschule</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Gymnasium"> Gymnasium</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Berufsfachschule"> Berufsfachschule</label>
+            <label class="radio-pill"><input type="radio" name="schule_art" value="Sonstiges"> Sonstiges: <input class="inline-input" type="text" id="schule_art_sonst" placeholder="…" onclick="document.querySelector('[name=schule_art][value=Sonstiges]').checked=true"></label>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label>Höchster Schulabschluss*</label>
+          <div class="radio-group" style="flex-wrap:wrap">
+            <label class="radio-pill"><input type="radio" name="abschluss" value="ohne Abschluss"> ohne Abschluss</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Hauptschulabschluss"> Hauptschulabschluss</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Werkrealschulabschluss"> Werkrealschulabschluss</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Realschulabschluss"> Realschulabschluss</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Fachschulreife"> Fachschulreife</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="mittlerer Bildungsabschluss (9+3)"> mittl. Bildungsabschluss</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Fachhochschulreife"> Fachhochschulreife</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="fachgebundene Hochschulreife"> fachgeb. Hochschulreife</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="allgemeine Hochschulreife"> allg. Hochschulreife</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Abschlusszeugnis (beruflich)"> Abschlusszeugnis (berufl.)</label>
+            <label class="radio-pill"><input type="radio" name="abschluss" value="Sonstiges"> Sonstiges: <input class="inline-input" type="text" id="abschluss_sonst" placeholder="…" onclick="document.querySelector('[name=abschluss][value=Sonstiges]').checked=true"></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Erstmalige Einschulung in Deutschland am*</label>
+          <input type="date" id="einschulung_dt" style="max-width:200px">
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5: Ausbildung ══ -->
+    <div class="step-section section-hidden" data-step="5">
+      <div class="card">
+        <div class="card-title">Ausbildung</div>
+        <div class="field" style="margin-bottom:6px">
+          <label>Handelt es sich um eine Anmeldung für eine Ausbildung?*</label>
+          <div class="radio-group" id="ausb-ja-nein-group">
+            <label class="radio-pill"><input type="radio" name="ausb_janein" value="ja" onchange="toggleAusbDetails()"> Ja</label>
+            <label class="radio-pill"><input type="radio" name="ausb_janein" value="nein" onchange="toggleAusbDetails()"> Nein</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ausbildungsdetails – nur sichtbar wenn "Ja" gewählt -->
+      <div id="ausb-details" style="display:none">
+        <div class="card">
+          <div class="card-title">Ausbildung / Vorvertrag / Praktikumsvertrag</div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field" style="grid-column:1/-1"><label>Ausbildungsberuf*</label><input type="text" id="ausb_beruf" placeholder="z. B. Elektroniker/-in für Energie- und Gebäudetechnik"></div>
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>Vertragsart*</label>
+            <div class="radio-group">
+              <label class="radio-pill"><input type="radio" name="vertragsart" value="Ausbildungsvertrag"> Ausbildungsvertrag</label>
+              <label class="radio-pill"><input type="radio" name="vertragsart" value="Vorvertrag/Praktikumsvertrag"> Vorvertrag/Praktikumsvertrag</label>
+            </div>
+          </div>
+          <div class="field-grid fg-1" style="margin-bottom:14px">
+            <div class="field"><label>Name des Betriebs*</label><input type="text" id="betrieb_name"></div>
+          </div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field"><label>Straße und Hausnummer*</label><input type="text" id="betrieb_strasse"></div>
+            <div class="field"><label>PLZ*</label><input type="text" id="betrieb_plz"></div>
+            <div class="field" style="grid-column:1/-1"><label>Ort*</label><input type="text" id="betrieb_ort"></div>
+          </div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field"><label>Telefon Betrieb*</label><input type="tel" id="betrieb_tel"></div>
+            <div class="field"><label>Mobil Betrieb*</label><input type="tel" id="betrieb_mobil"></div>
+            <div style="grid-column:1/-1;font-size:11px;color:var(--text-muted);margin-top:-6px">* Mindestens Telefon oder Mobil muss angegeben werden.</div>
+          </div>
+          <div class="field"><label>E-Mail Betrieb*</label><input type="email" id="betrieb_email"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Kontaktperson / Ausbilder</div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field"><label>Name*</label><input type="text" id="ausb_kontakt_name"></div>
+            <div class="field"><label>Vorname*</label><input type="text" id="ausb_kontakt_vorname"></div>
+          </div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field"><label>Telefon*</label><input type="tel" id="ausb_kontakt_tel"></div>
+            <div class="field"><label>Mobil*</label><input type="tel" id="ausb_kontakt_mobil"></div>
+          </div>
+          <div class="field"><label>E-Mail*</label><input type="email" id="ausb_kontakt_email"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Ausbildungszeitraum</div>
+          <div class="field-grid fg-2" style="margin-bottom:14px">
+            <div class="field"><label>Beginn der Ausbildung*</label><input type="date" id="ausb_beginn"></div>
+            <div class="field"><label>Ende der Ausbildung*</label><input type="date" id="ausb_ende"></div>
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>Ausbildungsverkürzung</label>
+            <div class="radio-group">
+              <label class="radio-pill"><input type="radio" name="verkuerzung" value="nein" checked> nein</label>
+              <label class="radio-pill"><input type="radio" name="verkuerzung" value="ja"> ja</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Kammer*</label>
+            <div class="radio-group">
+              <label class="radio-pill"><input type="radio" name="kammer" value="HWK/IHK Karlsruhe" checked onchange="toggleKammerAndere()"> HWK/IHK Karlsruhe</label>
+              <label class="radio-pill"><input type="radio" name="kammer" value="andere" onchange="toggleKammerAndere()"> Andere</label>
+            </div>
+            <div id="kammer-andere-wrap" style="display:none;margin-top:10px">
+              <input type="text" id="kammer_andere" placeholder="Bitte Kammer eintragen …" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:7px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fafaf8;color:var(--text);">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 6: Unterschrift ══ -->
+    <div class="step-section section-hidden" data-step="6">
+      <div class="card">
+        <div class="card-title">Erklärung und Unterschriften</div>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:18px">
+          Hiermit versichere ich die Richtigkeit meiner Angaben. Ich bin mir bewusst, dass unrichtige Angaben den Ausschluss von der Schule nach sich ziehen kann und die Nichtigkeit von Prüfungen und Zeugnissen bewirken.
+        </p>
+
+        <div style="margin-bottom:20px">
+          <div class="field" style="margin-bottom:8px">
+            <label>Unterschrift Schüler/-in</label>
+          </div>
+          <div class="sig-wrap">
+            <div class="sig-hint">Hier mit dem Finger unterschreiben</div>
+            <canvas id="sig-student" height="120"></canvas>
+            <div class="sig-tools">
+              <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="clearSig('sig-student')">Löschen</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Unterschrift gesetzl. Vertreter/-in <span style="font-size:11px;color:var(--text-muted)">(bei Minderjährigen)</span></label>
+          </div>
+          <div class="sig-wrap">
+            <div class="sig-hint">Hier mit dem Finger unterschreiben</div>
+            <canvas id="sig-guardian" height="120"></canvas>
+            <div class="sig-tools">
+              <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="clearSig('sig-guardian')">Löschen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 7: Dokumente ══ -->
+    <div class="step-section section-hidden" data-step="7">
+      <div class="card">
+        <div class="card-title">Checkliste – eingereichte Dokumente</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Bitte ankreuzen, welche Dokumente vorliegen:</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="checkbox-pill" id="doc-zeugnis-label"><input type="checkbox" id="doc_zeugnis"> Letztes Zeugnis</label>
+          <label class="checkbox-pill"><input type="checkbox" id="doc_ausweis"> Ausweiskopie</label>
+          <label class="checkbox-pill"><input type="checkbox" id="doc_foto"> 1 Passbild</label>
+          <label class="checkbox-pill"><input type="checkbox" id="doc_lebenslauf"> Lebenslauf</label>
+          <label class="checkbox-pill"><input type="checkbox" id="doc_vertrag"> Ausbildungs-/Vor-/Praktikumsvertrag</label>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--accent-light);border-color:#b8cde0">
+        <p style="font-size:12px;color:var(--accent);line-height:1.6">
+          <strong>Datenschutzhinweis:</strong> Die auf dem Formular erhobenen Daten werden elektronisch erfasst und gespeichert. Die Erhebung erfolgt ausschließlich zu schulischen Zwecken. Rechtsvorschriften: §11 Landesdatenschutzgesetz, §36 Landesverwaltungsverfahrensgesetz und §23 Abs. 1 und 2, 72 Schulgesetz.
+        </p>
+      </div>
+
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn btn-secondary" style="margin-right:12px" onclick="showStep(6)">← Zurück</button>
+        <button class="btn btn-save" onclick="saveRecord()">Anmeldung speichern</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 8: Bestätigung ══ -->
+    <div class="step-section section-hidden" data-step="8">
+      <div class="confirm-box">
+        <div class="check-icon">✓</div>
+        <h3>Anmeldung gespeichert</h3>
+        <p id="confirm-name-txt"></p>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="if(lastSavedId) printRecord(lastSavedId); else window.print()">Drucken</button>
+        <button class="btn btn-primary" onclick="newForm()">Neue Anmeldung</button>
+      </div>
+    </div>
+
+    <!-- NAV BAR -->
+    <div class="nav-bar" id="nav-bar">
+      <button class="btn btn-secondary" id="btn-back" onclick="goBack()">← Zurück</button>
+      <span class="step-counter" id="step-counter"></span>
+      <button class="btn btn-primary" id="btn-next" onclick="goNext()">Weiter →</button>
+    </div>
+
+  </div><!-- /form-view -->
+</div><!-- /main -->
+
+<!-- ─────────────────────────────── ADMIN OVERLAY ─────────────────────────────── -->
+<div class="overlay" id="admin-overlay">
+  <div class="overlay-panel">
+    <div class="overlay-header">
+      <h2>Admin – Archiv</h2>
+      <button class="close-btn" onclick="closeAdmin()">×</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="admin-login">
+      <div class="login-wrap">
+        <h3>Adminzugang</h3>
+        <div class="field" style="margin-bottom:14px">
+          <label>Passwort</label>
+          <input type="password" id="admin-pw" placeholder="Passwort eingeben" onkeyup="if(event.key==='Enter')checkAdminPw()">
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="checkAdminPw()">Anmelden</button>
+        <p id="pw-error" style="color:#a32d2d;font-size:13px;margin-top:8px;text-align:center;display:none">Falsches Passwort.</p>
+      </div>
+    </div>
+
+    <!-- ARCHIVE -->
+    <div id="admin-archive" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:14px;color:var(--text-muted)" id="archive-count"></span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="exportExcel()">CSV exportieren</button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="exportJSON()">Datei speichern (.json)</button>
+          <label class="btn btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;margin:0">Datei laden (.json)<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+          <button class="btn btn-danger" style="font-size:12px;padding:6px 14px" onclick="clearArchive()">Alle löschen</button>
+        </div>
+      </div>
+      <div id="archive-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────
+const STEPS = [
+  { label: 'Grunddaten' },
+  { label: 'Anschrift' },
+  { label: 'Erz.-Berech.' },
+  { label: 'Schulbildung' },
+  { label: 'Ausbildung' },
+  { label: 'Unterschrift' },
+  { label: 'Dokumente' },
+  { label: 'Fertig' }
+];
+let currentStep = 1;
+const TOTAL = STEPS.length;
+
+// ─── INIT ─────────────────────────────────────────────────────────
+function getSchuljahr() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const start = m >= 8 ? y : y - 1;
+  return `${start}/${String(start + 1).slice(2)}`;
+}
+
+document.getElementById('schuljahr').value = getSchuljahr();
+buildSteps();
+showStep(1);
+initSignature('sig-student');
+initSignature('sig-guardian');
+
+function toggleAnspSonstige() {
+  const val = document.querySelector('[name=ansp_art]:checked')?.value;
+  const wrap = document.getElementById('ansp-sonstige-wrap');
+  if (wrap) wrap.style.display = val === 'Sonstige' ? '' : 'none';
+  if (val !== 'Sonstige') { const f = document.getElementById('ansp_sonstige'); if(f) f.value = ''; }
+}
+
+function toggleKammerAndere() {
+  const val = document.querySelector('[name=kammer]:checked')?.value;
+  const wrap = document.getElementById('kammer-andere-wrap');
+  if (wrap) wrap.style.display = val === 'andere' ? '' : 'none';
+  if (val !== 'andere') { const f = document.getElementById('kammer_andere'); if(f) f.value = ''; }
+}
+
+function toggleAusbDetails() {
+  const val = document.querySelector('[name=ausb_janein]:checked')?.value;
+  document.getElementById('ausb-details').style.display = val === 'ja' ? '' : 'none';
+}
+
+function toggleKonfessionExtra() {
+  const sel = document.querySelector('[name=konfession]:checked');
+  const extra = document.getElementById('konfession-extra');
+  if (extra) extra.classList.toggle('visible', sel && sel.value === 'sonstige');
+}
+
+function updateVjLabels() {
+  const volljährig = document.querySelector('[name=vj_status]:checked')?.value === 'volljährig';
+  const stars = ['e1_name','e1_vorname','e1_email','e1_strasse','e1_plz','e1_ort','e1_tel','e1_mobil','e1_geschl'];
+  stars.forEach(id => {
+    const el = document.getElementById(id) || document.querySelector('[name='+id+']');
+    if (!el) return;
+    const lbl = el.closest('.field')?.querySelector('label');
+    if (!lbl) return;
+    lbl.textContent = lbl.textContent.replace('*','').trimEnd() + (volljährig ? '' : '*');
+  });
+  document.getElementById('vj-mj-options').style.display = volljährig ? 'none' : '';
+  document.getElementById('vj-vj-options').style.display = volljährig ? '' : 'none';
+  const hint = document.querySelector('#step-3-e1-tel-hint');
+  if (hint) hint.style.display = volljährig ? 'none' : '';
+}
+document.querySelectorAll('[name=vj_status]').forEach(r =>
+  r.addEventListener('change', updateVjLabels)
+);
+
+// ─── STEP BUILDER ─────────────────────────────────────────────────
+function buildSteps() {
+  const bar = document.getElementById('steps-bar');
+  bar.innerHTML = '';
+  STEPS.forEach((s, i) => {
+    const n = i + 1;
+    const wrap = document.createElement('div');
+    wrap.className = 'step-wrap';
+    wrap.innerHTML = `<div class="step-dot" id="sd-${n}" onclick="jumpStep(${n})">${n}</div>
+      <div class="step-label">${s.label}</div>`;
+    bar.appendChild(wrap);
+    if (n < TOTAL) {
+      const line = document.createElement('div');
+      line.className = 'step-line';
+      line.id = `sl-${n}`;
+      line.style.marginBottom = '16px';
+      bar.appendChild(line);
+    }
+  });
+}
+
+function updateStepUI() {
+  for (let i = 1; i <= TOTAL; i++) {
+    const dot = document.getElementById(`sd-${i}`);
+    if (!dot) continue;
+    dot.className = 'step-dot ' + (i < currentStep ? 'done' : i === currentStep ? 'active' : '');
+    if (i < TOTAL) {
+      const line = document.getElementById(`sl-${i}`);
+      if (line) line.className = 'step-line ' + (i < currentStep ? 'done' : '');
+    }
+  }
+  document.getElementById('step-counter').textContent = `Schritt ${currentStep} von ${TOTAL}`;
+  document.getElementById('btn-back').style.visibility = currentStep > 1 && currentStep < TOTAL ? 'visible' : 'hidden';
+  const nextBtn = document.getElementById('btn-next');
+  if (currentStep >= TOTAL) {
+    document.getElementById('nav-bar').style.display = 'none';
+  } else if (currentStep === TOTAL - 1) {
+    // Step 7 (Dokumente/Speichern): Nav-Bar komplett ausblenden, Speichern-Button liegt in der Karte
+    document.getElementById('nav-bar').style.display = 'none';
+  } else {
+    document.getElementById('nav-bar').style.display = 'flex';
+    nextBtn.textContent = 'Weiter →';
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step-section').forEach(el => {
+    const s = parseInt(el.dataset.step);
+    el.classList.toggle('section-hidden', s !== n);
+  });
+  currentStep = n;
+  updateStepUI();
+  // Klasse aus Topbar-Feld synchronisieren
+  const klasseEl = document.getElementById('aks_klasse_ein');
+  if (klasseEl) klasseEl.value = document.getElementById('klasse')?.value || '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function markError(el, msg) {
+  el.classList.add('field-error');
+  let em = el.querySelector('.error-msg');
+  if (!em) { em = document.createElement('span'); em.className = 'error-msg'; el.appendChild(em); }
+  em.textContent = msg || 'Pflichtfeld';
+}
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(el => {
+    el.classList.remove('field-error');
+    const em = el.querySelector('.error-msg'); if (em) em.remove();
+  });
+  // Inline-outline vom Konfessions-Sonstige-Feld zurücksetzen
+  const konfExtra = document.getElementById('konfession-extra');
+  if (konfExtra) { konfExtra.style.outline = ''; konfExtra.style.borderRadius = ''; }
+  // Kammer-Andere-Outline zurücksetzen
+  const kammerWrap = document.getElementById('kammer-andere-wrap');
+  if (kammerWrap) { kammerWrap.style.outline = ''; kammerWrap.style.borderRadius = ''; }
+  // Zeugnis-Pflichtfeld-Outline zurücksetzen
+  const zLbl = document.getElementById('doc-zeugnis-label');
+  if (zLbl) { zLbl.style.outline = ''; zLbl.style.borderRadius = ''; zLbl.style.color = ''; }
+}
+function getFieldWrap(id) {
+  const el = document.getElementById(id);
+  return el ? el.closest('.field') : null;
+}
+function radioSelected(name) { return !!document.querySelector('[name='+name+']:checked'); }
+
+function validateStep(step) {
+  clearErrors();
+  let ok = true;
+  function req(id, msg) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { const w = getFieldWrap(id); if(w) markError(w, msg||'Pflichtfeld'); ok = false; }
+  }
+  function reqRadio(name, groupId, msg) {
+    if (!radioSelected(name)) {
+      const g = document.getElementById(groupId) || document.querySelector('[name='+name+']')?.closest('.field');
+      if (g) markError(g.closest ? g.closest('.field') || g : g, msg||'Bitte auswählen'); ok = false;
+    }
+  }
+
+  if (step === 1) {
+    req('f_name'); req('f_vorname'); req('f_geb_am'); req('f_geb_ort');
+    req('f_geburtsland'); req('f_muttersprache'); req('f_staatsa');
+    if (!radioSelected('geschlecht')) {
+      const w = document.querySelector('[name=geschlecht]')?.closest('.field');
+      if (w) markError(w, 'Bitte auswählen'); ok = false;
+    }
+    if (!radioSelected('konfession')) {
+      const w = document.querySelector('[name=konfession]')?.closest('.field');
+      if (w) markError(w, 'Bitte auswählen'); ok = false;
+    } else if (document.querySelector('[name=konfession]:checked')?.value === 'sonstige' && !document.getElementById('konfession_sonstige').value.trim()) {
+      const w = document.getElementById('konfession_sonstige')?.closest('.konfession-extra') || document.getElementById('konfession_sonstige')?.parentElement;
+      if (w) { w.style.outline = '2px solid #c0392b'; w.style.borderRadius = '6px'; } ok = false;
+    }
+  }
+  if (step === 2) {
+    req('s_strasse'); req('s_plz'); req('s_ort'); req('s_email');
+    const tel = document.getElementById('s_tel')?.value.trim();
+    const mob = document.getElementById('s_mobil')?.value.trim();
+    if (!tel && !mob) {
+      const wt = getFieldWrap('s_tel'); const wm = getFieldWrap('s_mobil');
+      if (wt) markError(wt, 'Min. eines erforderlich'); if (wm) markError(wm, ''); ok = false;
+    }
+  }
+  if (step === 3) {
+    const volljährig = document.querySelector('[name=vj_status]:checked')?.value === 'volljährig';
+    if (!volljährig) {
+      req('e1_name'); req('e1_vorname'); req('e1_email');
+      req('e1_strasse'); req('e1_plz'); req('e1_ort');
+      if (!radioSelected('e1_geschl')) {
+        const w = document.querySelector('[name=e1_geschl]')?.closest('.field');
+        if (w) markError(w, 'Bitte auswählen'); ok = false;
+      }
+      const t1 = document.getElementById('e1_tel')?.value.trim();
+      const m1 = document.getElementById('e1_mobil')?.value.trim();
+      if (!t1 && !m1) {
+        const wt = getFieldWrap('e1_tel'); const wm = getFieldWrap('e1_mobil');
+        if (wt) markError(wt, 'Min. eines erforderlich'); if (wm) markError(wm, ''); ok = false;
+      }
+    }
+  }
+  if (step === 4) {
+    req('aks_eintritt'); req('aks_klasse_ein'); req('schule_name'); req('schule_ort'); req('einschulung_dt');
+    if (!radioSelected('schule_art')) {
+      const w = document.querySelector('[name=schule_art]')?.closest('.field');
+      if (w) markError(w, 'Bitte auswählen'); ok = false;
+    }
+    if (!radioSelected('abschluss')) {
+      const w = document.querySelector('[name=abschluss]')?.closest('.field');
+      if (w) markError(w, 'Bitte auswählen'); ok = false;
+    }
+  }
+  if (step === 5) {
+    if (!radioSelected('ausb_janein')) {
+      const w = document.getElementById('ausb-ja-nein-group')?.closest('.field');
+      if (w) markError(w, 'Bitte auswählen'); ok = false;
+    } else if (document.querySelector('[name=ausb_janein]:checked')?.value === 'ja') {
+      // Betrieb
+      req('ausb_beruf'); req('betrieb_name'); req('betrieb_strasse'); req('betrieb_plz'); req('betrieb_ort'); req('betrieb_email');
+      if (!radioSelected('vertragsart')) {
+        const w = document.querySelector('[name=vertragsart]')?.closest('.field');
+        if (w) markError(w, 'Bitte auswählen'); ok = false;
+      }
+      const bt = document.getElementById('betrieb_tel')?.value.trim();
+      const bm = document.getElementById('betrieb_mobil')?.value.trim();
+      if (!bt && !bm) {
+        const wt = getFieldWrap('betrieb_tel'); const wm = getFieldWrap('betrieb_mobil');
+        if (wt) markError(wt, 'Min. eines erforderlich'); if (wm) markError(wm, ''); ok = false;
+      }
+      // Kontaktperson
+      req('ausb_kontakt_name'); req('ausb_kontakt_vorname'); req('ausb_kontakt_email');
+      const kt = document.getElementById('ausb_kontakt_tel')?.value.trim();
+      const km = document.getElementById('ausb_kontakt_mobil')?.value.trim();
+      if (!kt && !km) {
+        const wt = getFieldWrap('ausb_kontakt_tel'); const wm = getFieldWrap('ausb_kontakt_mobil');
+        if (wt) markError(wt, 'Min. eines erforderlich'); if (wm) markError(wm, ''); ok = false;
+      }
+      // Zeitraum
+      req('ausb_beginn'); req('ausb_ende');
+      if (!radioSelected('kammer')) {
+        const w = document.querySelector('[name=kammer]')?.closest('.field');
+        if (w) markError(w, 'Bitte auswählen'); ok = false;
+      } else if (document.querySelector('[name=kammer]:checked')?.value === 'andere' && !document.getElementById('kammer_andere')?.value.trim()) {
+        const w = document.getElementById('kammer-andere-wrap');
+        if (w) { w.style.outline = '2px solid #c0392b'; w.style.borderRadius = '7px'; } ok = false;
+      }
+    }
+  }
+  if (step === 7) {
+    if (!document.getElementById('doc_zeugnis')?.checked) {
+      const lbl = document.getElementById('doc-zeugnis-label');
+      if (lbl) { lbl.style.outline = '2px solid #c0392b'; lbl.style.borderRadius = '8px'; lbl.style.color = '#c0392b'; }
+      ok = false;
+    }
+  }
+  if (!ok) window.scrollTo({ top: 0, behavior: 'smooth' });
+  return ok;
+}
+
+function goNext() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep < TOTAL) showStep(currentStep + 1);
+}
+function goBack() {
+  if (currentStep > 1) showStep(currentStep - 1);
+}
+function jumpStep(n) {
+  if (n < currentStep && currentStep < 8) showStep(n);
+}
+
+// ─── SIGNATURE ────────────────────────────────────────────────────
+function initSignature(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let drawing = false, last = {};
+
+  function resize() {
+    const w = canvas.offsetWidth;
+    if (!w) return;
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    canvas.width = w;
+    canvas.height = 120;
+    ctx.putImageData(img, 0, 0);
+    ctx.strokeStyle = '#1a1a18';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function pos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left) * (canvas.width / r.width), y: (src.clientY - r.top) * (canvas.height / r.height) };
+  }
+  function start(e) { e.preventDefault(); drawing = true; last = pos(e); ctx.beginPath(); }
+  function move(e) {
+    if (!drawing) return; e.preventDefault();
+    const p = pos(e);
+    ctx.strokeStyle = '#1a1a18'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+  }
+  function stop() { drawing = false; }
+  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false }); canvas.addEventListener('touchmove', move, { passive: false }); canvas.addEventListener('touchend', stop);
+}
+
+function clearSig(id) {
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+}
+
+function getSigData(id) {
+  const c = document.getElementById(id);
+  return c ? c.toDataURL() : '';
+}
+
+function isSigEmpty(id) {
+  const c = document.getElementById(id);
+  if (!c) return true;
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  for (let i = 3; i < data.length; i += 4) if (data[i] > 10) return false;
+  return true;
+}
+
+// ─── COLLECT DATA ─────────────────────────────────────────────────
+function radio(name) {
+  const el = document.querySelector(`[name=${name}]:checked`);
+  return el ? el.value : '';
+}
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+function checked(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked : false;
+}
+
+function collectData() {
+  return {
+    schuljahr: val('schuljahr'),
+    klasse: val('klasse'),
+    schueler: {
+      name: val('f_name'), vorname: val('f_vorname'),
+      gebAm: val('f_geb_am'), gebOrt: val('f_geb_ort'),
+      geburtsland: val('f_geburtsland'), muttersprache: val('f_muttersprache'),
+      staatsa: val('f_staatsa'), geschlecht: radio('geschlecht'),
+      konfession: radio('konfession') === 'sonstige' ? 'sonstige: ' + val('konfession_sonstige') : radio('konfession')
+    },
+    anschrift: {
+      wohnart: radio('wohnart'), strasse: val('s_strasse'),
+      plz: val('s_plz'), ort: val('s_ort'),
+      tel: val('s_tel'), mobil: val('s_mobil'), email: val('s_email')
+    },
+    erziehung: {
+      status: radio('vj_status'),
+      art: radio('erz_art') === 'Sonstige' ? 'Sonstige: ' + val('erz_sonstige') : radio('erz_art'),
+      anspArt: radio('ansp_art') === 'Sonstige' ? 'Sonstige: ' + val('ansp_sonstige') : radio('ansp_art'),
+      e1: { name: val('e1_name'), vorname: val('e1_vorname'), geschl: radio('e1_geschl'), strasse: val('e1_strasse'), plz: val('e1_plz'), ort: val('e1_ort'), tel: val('e1_tel'), mobil: val('e1_mobil'), email: val('e1_email') },
+      e2: { name: val('e2_name'), vorname: val('e2_vorname'), geschl: radio('e2_geschl'), strasse: val('e2_strasse'), plz: val('e2_plz'), ort: val('e2_ort'), tel: val('e2_tel'), mobil: val('e2_mobil'), email: val('e2_email') }
+    },
+    schule: {
+      eintritt: val('aks_eintritt'), klasse: val('aks_klasse_ein'),
+      name: val('schule_name'), ort: val('schule_ort'),
+      art: radio('schule_art') === 'Sonstiges' ? 'Sonstiges: ' + val('schule_art_sonst') : radio('schule_art'),
+      abschluss: radio('abschluss') === 'Sonstiges' ? 'Sonstiges: ' + val('abschluss_sonst') : radio('abschluss'),
+      einschulung: val('einschulung_dt')
+    },
+    ausbildung: {
+      janein: radio('ausb_janein'),
+      beruf: val('ausb_beruf'), vertragsart: radio('vertragsart'),
+      betriebName: val('betrieb_name'), betriebStrasse: val('betrieb_strasse'),
+      betriebPlz: val('betrieb_plz'), betriebOrt: val('betrieb_ort'),
+      betriebTel: val('betrieb_tel'), betriebMobil: val('betrieb_mobil'), betriebEmail: val('betrieb_email'),
+      kontaktName: val('ausb_kontakt_name'), kontaktVorname: val('ausb_kontakt_vorname'),
+      kontaktTel: val('ausb_kontakt_tel'), kontaktMobil: val('ausb_kontakt_mobil'),
+      kontaktEmail: val('ausb_kontakt_email'),
+      beginn: val('ausb_beginn'), ende: val('ausb_ende'),
+      verkuerzung: radio('verkuerzung'),
+      kammer: radio('kammer') === 'andere' ? 'andere: ' + val('kammer_andere') : radio('kammer')
+    },
+    dokumente: {
+      zeugnis: checked('doc_zeugnis'), ausweis: checked('doc_ausweis'),
+      foto: checked('doc_foto'), lebenslauf: checked('doc_lebenslauf'), vertrag: checked('doc_vertrag')
+    },
+    sigSchueler: getSigData('sig-student'),
+    sigVertreter: getSigData('sig-guardian'),
+    sigSchuelerEmpty: isSigEmpty('sig-student'),
+    sigVertreterEmpty: isSigEmpty('sig-guardian'),
+    savedAt: new Date().toLocaleString('de-DE')
+  };
+}
+
+// ─── SAVE ─────────────────────────────────────────────────────────
+let lastSavedId = null;
+
+function saveRecord() {
+  const data = collectData();
+  if (!data.schueler.name || !data.schueler.vorname) {
+    alert('Bitte mindestens Vor- und Nachname des/der Schülers/-in eintragen.');
+    showStep(1);
+    return;
+  }
+  const archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  data.id = Date.now();
+  lastSavedId = data.id;
+  archive.unshift(data);
+  localStorage.setItem('aks_archive', JSON.stringify(archive));
+  document.getElementById('confirm-name-txt').textContent =
+    `${data.schueler.vorname} ${data.schueler.name} wurde erfolgreich archiviert (${data.savedAt}).`;
+  showStep(8);
+}
+
+function newForm() {
+  lastSavedId = null;
+  document.querySelectorAll('input[type=text],input[type=date],input[type=tel],input[type=email],textarea').forEach(el => el.value = '');
+  document.querySelectorAll('input[type=radio]').forEach(el => el.checked = false);
+  document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+  clearSig('sig-student'); clearSig('sig-guardian');
+  document.getElementById('schuljahr').value = getSchuljahr();
+  showStep(1);
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────
+// Passwort-Hash (SHA-256 von '#aks#') – Klartext nie im Quellcode speichern
+const ADMIN_PW_HASH = 'e0bc948e242c0817adaaa1227c3f540c185c297cdb84467e61f67b35a49b69eb'; // Passwort: !Alfons26
+
+async function hashString(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function openAdmin() {
+  // Immer Passwort neu abfragen
+  document.getElementById('admin-overlay').classList.add('open');
+  document.getElementById('admin-login').style.display = '';
+  document.getElementById('admin-archive').style.display = 'none';
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('pw-error').style.display = 'none';
+  setTimeout(() => document.getElementById('admin-pw').focus(), 100);
+}
+function closeAdmin() {
+  document.getElementById('admin-overlay').classList.remove('open');
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('pw-error').style.display = 'none';
+}
+async function checkAdminPw() {
+  const pw = document.getElementById('admin-pw').value;
+  const hash = await hashString(pw);
+  if (hash === ADMIN_PW_HASH) {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-archive').style.display = '';
+    renderArchive();
+  } else {
+    document.getElementById('pw-error').style.display = '';
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('admin-pw').focus();
+  }
+}
+
+function renderArchive() {
+  const archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  const list = document.getElementById('archive-list');
+  document.getElementById('archive-count').textContent = `${archive.length} Einträge`;
+  if (!archive.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;text-align:center;padding:20px">Noch keine Einträge vorhanden.</p>';
+    return;
+  }
+  list.innerHTML = archive.map((d, idx) => `
+    <div class="archive-item" onclick="toggleDetail(${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <div class="archive-item-name">${d.schueler.vorname} ${d.schueler.name}</div>
+          <div class="archive-item-meta">Klasse ${d.klasse || '–'} · Schuljahr ${d.schuljahr} · Gespeichert: ${d.savedAt}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <span class="tag">${d.ausbildung.beruf || 'Beruf n.a.'}</span>
+          <button onclick="event.stopPropagation();deleteRecord(${d.id})" style="background:none;border:none;color:var(--accent2);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">×</button>
+        </div>
+      </div>
+      <div class="archive-detail" id="detail-${idx}" style="display:none">
+        <div class="detail-grid">
+          <div class="detail-row"><span class="detail-label">Geburtsdatum</span><span class="detail-value">${fmtDate(d.schueler.gebAm)}</span></div>
+          <div class="detail-row"><span class="detail-label">Geburtsort</span><span class="detail-value">${d.schueler.gebOrt||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Geschlecht</span><span class="detail-value">${d.schueler.geschlecht||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Konfession</span><span class="detail-value">${d.schueler.konfession||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Adresse</span><span class="detail-value">${d.anschrift.strasse||''} ${d.anschrift.plz||''} ${d.anschrift.ort||''}</span></div>
+          <div class="detail-row"><span class="detail-label">Telefon / Mobil</span><span class="detail-value">${d.anschrift.tel||''} / ${d.anschrift.mobil||''}</span></div>
+          <div class="detail-row"><span class="detail-label">E-Mail</span><span class="detail-value">${d.anschrift.email||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Schulabschluss</span><span class="detail-value">${d.schule.abschluss||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Betrieb</span><span class="detail-value">${d.ausbildung.betriebName||'–'}</span></div>
+          <div class="detail-row"><span class="detail-label">Ausbildungszeitraum</span><span class="detail-value">${fmtDate(d.ausbildung.beginn)} – ${fmtDate(d.ausbildung.ende)}</span></div>
+        </div>
+        ${d.sigSchueler && !d.sigSchuelerEmpty ? `
+          <div style="margin-top:12px">
+            <div class="detail-label" style="margin-bottom:4px">Unterschrift Schüler/-in</div>
+            <img class="sig-preview" src="${d.sigSchueler}" alt="Unterschrift">
+          </div>` : ''}
+        ${d.sigVertreter && !d.sigVertreterEmpty ? `
+          <div style="margin-top:10px">
+            <div class="detail-label" style="margin-bottom:4px">Unterschrift Vertreter/-in</div>
+            <img class="sig-preview" src="${d.sigVertreter}" alt="Unterschrift">
+          </div>` : ''}
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="event.stopPropagation();printRecord(${d.id})">Drucken</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleDetail(idx) {
+  const el = document.getElementById(`detail-${idx}`);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function deleteRecord(id) {
+  if (!confirm('Diesen Eintrag löschen?')) return;
+  let archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  archive = archive.filter(d => d.id !== id);
+  localStorage.setItem('aks_archive', JSON.stringify(archive));
+  renderArchive();
+}
+
+function clearArchive() {
+  if (!confirm('Wirklich ALLE Einträge unwiderruflich löschen?')) return;
+  localStorage.removeItem('aks_archive');
+  renderArchive();
+}
+
+function chk(val) { return val ? '☑' : '☐'; }
+
+function printRecord(id) {
+  const archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  const d = archive.find(r => r.id === id);
+  if (!d) return;
+  const w = window.open('', '_blank');
+
+  const sigS = (d.sigSchueler && !d.sigSchuelerEmpty) ? `<img src="${d.sigSchueler}" style="max-height:42pt;max-width:160pt;display:block">` : '';
+  const sigV = (d.sigVertreter && !d.sigVertreterEmpty) ? `<img src="${d.sigVertreter}" style="max-height:42pt;max-width:160pt;display:block">` : '';
+
+  const ausbildungJa = d.ausbildung && d.ausbildung.janein === 'ja';
+
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+  <title>Schüleraufnahme</title>
+  <style>
+    @page { size: A4; margin: 14mm 12mm 14mm 12mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 9.5pt; color: #000; background: #fff; }
+    .page { width: 100%; }
+
+    /* HEADER */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6pt; }
+    .header-left h1 { font-size: 22pt; font-weight: bold; margin-bottom: 4pt; }
+    .header-left p { font-size: 9.5pt; margin-bottom: 1pt; }
+    .header-right { text-align: right; font-size: 9pt; line-height: 1.5; }
+    .header-right img { height:44pt;width:auto; }
+    .header-checks { font-size: 9pt; margin-top: 4pt; border: 1pt solid #000; padding: 4pt 6pt; text-align: left; line-height: 1.3; }
+    .header-checks div { margin-bottom: 0; }
+
+    /* BOLD INTRO */
+    .intro { font-size: 9.5pt; font-weight: bold; margin-bottom: 6pt; display: flex; align-items: center; gap: 6pt; }
+
+    /* SECTION TABLES */
+    .section { border: 1pt solid #000; margin-bottom: 5pt; width: 100%; border-collapse: collapse; }
+    .section-title { font-weight: bold; font-size: 9.5pt; padding: 3pt 5pt; background: #fff; border-bottom: 1pt solid #000; }
+    .row { display: flex; border-bottom: 1pt solid #ccc; min-height: 16pt; }
+    .row:last-child { border-bottom: none; }
+    .cell { padding: 2pt 5pt; display: flex; align-items: center; flex: 1; border-right: 1pt solid #ccc; font-size: 9pt; }
+    .cell:last-child { border-right: none; }
+    .cell-label { font-size: 8.5pt; color: #333; min-width: 90pt; max-width: 90pt; }
+    .cell-val { font-size: 9pt; flex: 1; }
+    .cell-full { flex: 1; }
+    .w50 { flex: 0 0 50%; }
+    .w33 { flex: 0 0 33.33%; }
+    .w66 { flex: 0 0 66.66%; }
+
+    /* CHECKBOX ROW */
+    .chk-row { display: flex; align-items: center; gap: 10pt; padding: 2pt 5pt; font-size: 9pt; border-bottom: 1pt solid #ccc; flex-wrap: wrap; }
+    .chk-row:last-child { border-bottom: none; }
+    .chk-item { display: flex; align-items: center; gap: 3pt; }
+
+    /* DOKUMENTE TABLE */
+    .dok-table { width: 100%; border-collapse: collapse; }
+    .dok-table th, .dok-table td { border: 1pt solid #ccc; padding: 2pt 6pt; font-size: 9pt; text-align: center; }
+    .dok-table th { font-weight: bold; font-size: 8.5pt; }
+    .dok-table td:first-child { text-align: left; }
+
+    /* SIGNATURE AREA */
+    .sig-area { display: flex; gap: 10pt; padding: 4pt 5pt; min-height: 40pt; }
+    .sig-block { flex: 1; border-right: 1pt solid #ccc; padding-right: 10pt; }
+    .sig-block:last-child { border-right: none; padding-right: 0; }
+    .sig-label { font-size: 8pt; color: #555; margin-bottom: 3pt; }
+    .sig-line { border-bottom: 1pt solid #000; min-height: 28pt; display: flex; align-items: flex-end; padding-bottom: 2pt; }
+
+    /* BOTTOM */
+    .bottom-box { border: 1pt solid #000; margin-top: 5pt; font-size: 8.5pt; }
+    .bottom-row { display: flex; border-bottom: 1pt solid #ccc; }
+    .bottom-row:last-child { border-bottom: none; }
+    .bottom-cell { flex: 1; padding: 3pt 5pt; border-right: 1pt solid #ccc; }
+    .bottom-cell:last-child { border-right: none; }
+    .hint-box { font-size: 8pt; margin-top: 4pt; line-height: 1.4; color: #222; border: 1pt solid #ccc; padding: 4pt; }
+    .stand { font-size: 7.5pt; color: #555; text-align: right; margin-top: 2pt; }
+
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      img { max-width: 100% !important; }
+    }
+  </style>
+  <script>function fmtDate(s){if(!s)return'';const[y,m,dd]=s.split('-');if(!y||!m||!dd)return s;return dd+'.'+m+'.'+y;}<\/script>
+  </head><body><div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Schüleraufnahme</h1>
+      <p><strong>für das Schuljahr ${d.schuljahr||'____/____'}</strong></p>
+      <p style="margin-top:4pt"><strong>in die Klasse ${d.klasse||'_______________'}</strong></p>
+      <p style="margin-top:6pt;font-size:8pt;color:#555">Erstellt am: ${d.savedAt||''}</p>
+    </div>
+    <div class="header-right">
+      <div style="display:flex;align-items:flex-start;gap:8pt;justify-content:flex-end">
+        <div style="text-align:right">
+          <strong>Alfons-Kern-Schule</strong><br>
+          Gewerbliche Schule<br>
+          Theaterstr. 8<br>
+          75175 Pforzheim
+        </div>
+        <img src="data:image/png;base64,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" alt="AKS" style="height:44pt;width:auto">
+      </div>
+      <div class="header-checks">
+        <div>☐ Schüler/-in ist bereits angemeldet</div>
+        <div>☐ Neuanmeldung: Zuordnung zur Klasse geprüft: ___________________</div>
+        <div style="font-size:7.5pt;margin-top:2pt">Datum, Unterschrift Abteilungsleiter/-in</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRUNDDATEN -->
+  <table class="section">
+    <tr><td colspan="4" class="section-title">Schüler/-in - Grunddaten</td></tr>
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:20%">Familienname:</td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:30%;border-right:1pt solid #ccc"><strong>${d.schueler.name||''}</strong></td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:15%">Vorname:</td>
+      <td style="padding:2pt 5pt;font-size:9pt"><strong>${d.schueler.vorname||''}</strong></td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt;vertical-align:top">Geschlecht:</td>
+      <td style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc;vertical-align:top">
+        ${chk(d.schueler.geschlecht==='männlich')} männlich<br>
+        ${chk(d.schueler.geschlecht==='weiblich')} weiblich<br>
+        ${chk(d.schueler.geschlecht==='divers')} divers
+      </td>
+      <td style="padding:2pt 5pt;font-size:9pt;vertical-align:top">Konfession:</td>
+      <td style="padding:2pt 5pt;font-size:9pt;vertical-align:top">
+        ${chk(d.schueler.konfession==='römisch-katholisch')} römisch-katholisch &nbsp;
+        ${chk(d.schueler.konfession&&d.schueler.konfession!=='römisch-katholisch'&&d.schueler.konfession!=='evangelisch')} sonstige ${(d.schueler.konfession&&d.schueler.konfession!=='römisch-katholisch'&&d.schueler.konfession!=='evangelisch')?d.schueler.konfession.replace('sonstige: ',''):''}<br>
+        ${chk(d.schueler.konfession==='evangelisch')} evangelisch
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">geboren am:</td>
+      <td style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc"><script>document.write(fmtDate('${d.schueler.gebAm||''}'))<\/script></td>
+      <td style="padding:2pt 5pt;font-size:9pt">geboren in (Ort):</td>
+      <td style="padding:2pt 5pt;font-size:9pt">${d.schueler.gebOrt||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">Geburtsland:</td>
+      <td style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc">${d.schueler.geburtsland||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Muttersprache:</td>
+      <td style="padding:2pt 5pt;font-size:9pt">${d.schueler.muttersprache||''} &nbsp;&nbsp; <span style="font-size:8.5pt">Staatsangehörigkeit: ${d.schueler.staatsa||''}</span></td>
+    </tr>
+  </table>
+
+  <!-- ANSCHRIFT -->
+  <table class="section">
+    <tr><td colspan="4" class="section-title">Schüler/-in - Anschrift</td></tr>
+    <tr>
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">
+        Schüler/-in wohnt in: &nbsp; ${chk(d.anschrift.wohnart==='Wohnung')} Wohnung &nbsp;&nbsp; ${chk(d.anschrift.wohnart==='Wohnheim')} Wohnheim
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">Straße Hausnummer: &nbsp; ${d.anschrift.strasse||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">PLZ Ort: &nbsp; ${d.anschrift.plz||''} ${d.anschrift.ort||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt;width:50%;border-right:1pt solid #ccc">Telefon: &nbsp; ${d.anschrift.tel||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Mobil: &nbsp; ${d.anschrift.mobil||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">E-Mail: &nbsp; ${d.anschrift.email||''}</td>
+    </tr>
+  </table>
+
+  <!-- ERZIEHUNGSBERECHTIGTE -->
+  <table class="section">
+    <tr><td colspan="4" class="section-title">Erziehungsberechtige/-r – gesetzlicher Vertreter/-in – Ansprechpartner/-in</td></tr>
+    <tr>
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">
+        Schüler/-in ist nicht volljährig: Erziehungsberechtigte: &nbsp;
+        ${chk(d.erziehung.art==='beide Elternteile')} beide Elternteile &nbsp;
+        ${chk(d.erziehung.art==='nur Vater')} nur Vater &nbsp;
+        ${chk(d.erziehung.art==='nur Mutter')} nur Mutter<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.erziehung.art==='Vormund')} Vormund &nbsp;
+        ${chk(d.erziehung.art&&d.erziehung.art.startsWith('Sonstige'))} Sonstige: ${d.erziehung.art&&d.erziehung.art.startsWith('Sonstige')?d.erziehung.art.replace('Sonstige: ',''):''}
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">
+        Schüler/-in ist volljährig: Ansprechpartner: &nbsp;
+        ${chk(d.erziehung.anspArt==='Vater')} Vater &nbsp;
+        ${chk(d.erziehung.anspArt==='Mutter')} Mutter<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.erziehung.anspArt&&d.erziehung.anspArt.startsWith('Sonstige'))} Sonstige: ${d.erziehung.anspArt&&d.erziehung.anspArt.startsWith('Sonstige')?d.erziehung.anspArt.replace('Sonstige: ',''):''}
+      </td>
+    </tr>
+  </table>
+
+  <!-- 1. ERZIEHUNGSBERECHTIGTE -->
+  <table class="section">
+    <tr><td colspan="6" class="section-title">1. Erziehungsberechtige/-r oder Ansprechpartner/-in</td></tr>
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:25%;border-right:1pt solid #ccc">Familienname: ${d.erziehung.e1.name||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:45%;border-right:1pt solid #ccc">Vorname: ${d.erziehung.e1.vorname||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Geschlecht: ${d.erziehung.e1.geschl||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">Straße Hausnummer: ${d.erziehung.e1.strasse||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">PLZ Ort: ${d.erziehung.e1.plz||''} ${d.erziehung.e1.ort||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="2" style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc">Telefon: ${d.erziehung.e1.tel||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Mobil: ${d.erziehung.e1.mobil||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">E-Mail: ${d.erziehung.e1.email||''}</td>
+    </tr>
+  </table>
+
+  <!-- 2. ERZIEHUNGSBERECHTIGTE -->
+  <table class="section">
+    <tr><td colspan="3" class="section-title">ggf. 2. Erziehungsberechtige/-r</td></tr>
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:25%;border-right:1pt solid #ccc">Familienname: ${d.erziehung.e2.name||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:45%;border-right:1pt solid #ccc">Vorname: ${d.erziehung.e2.vorname||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Geschlecht: ${d.erziehung.e2.geschl||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">Straße Hausnummer: ${d.erziehung.e2.strasse||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">PLZ Ort: ${d.erziehung.e2.plz||''} ${d.erziehung.e2.ort||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="2" style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc">Telefon: ${d.erziehung.e2.tel||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Mobil: ${d.erziehung.e2.mobil||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">E-Mail: ${d.erziehung.e2.email||''}</td>
+    </tr>
+  </table>
+
+  <!-- SCHULISCHER WERDEGANG (Seite 2) -->
+  <table class="section" style="margin-top:8pt">
+    <tr><td colspan="2" class="section-title">Schulischer Werdegang</td></tr>
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:50%;border-right:1pt solid #ccc"><strong>Eintritt in die AKS am: ${d.schule.eintritt?d.schule.eintritt.split('-').reverse().join('.'):''}   </strong></td>
+      <td style="padding:2pt 5pt;font-size:9pt">in Klasse: <strong>${d.schule.klasse||''}</strong></td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc">letzte besuchte Schule: ${d.schule.name||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Ort: ${d.schule.ort||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="2" style="padding:3pt 5pt;font-size:9pt">
+        Art der Schule &nbsp;
+        ${chk(d.schule.art==='Hauptschule/Werkrealschule')} Hauptschule/Werkrealschule &nbsp;
+        ${chk(d.schule.art==='Realschule')} Realschule &nbsp;
+        ${chk(d.schule.art==='SBBZ')} SBBZ<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.art==='Gemeinschaftsschule')} Gemeinschaftsschule &nbsp;
+        ${chk(d.schule.art==='Gymnasium')} Gymnasium &nbsp;
+        ${chk(d.schule.art==='Berufsfachschule')} Berufsfachschule<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.art&&d.schule.art.startsWith('Sonstiges'))} Sonstiges: ${d.schule.art&&d.schule.art.startsWith('Sonstiges')?d.schule.art.replace('Sonstiges: ',''):'______________________________'}
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="2" style="padding:3pt 5pt;font-size:9pt">
+        höchster erreichter Schulabschluss &nbsp;
+        ${chk(d.schule.abschluss==='ohne Abschluss')} ohne Abschluss &nbsp;
+        ${chk(d.schule.abschluss==='Hauptschulabschluss')} Hauptschulabschluss<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.abschluss==='Werkrealschulabschluss')} Werkrealschulabschluss &nbsp;
+        ${chk(d.schule.abschluss==='Realschulabschluss')} Realschulabschluss<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.abschluss==='Fachschulreife')} Fachschulreife &nbsp;
+        ${chk(d.schule.abschluss==='mittlerer Bildungsabschluss (9+3)')} mittlerer Bildungsabschluss (9+3)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.abschluss==='Fachhochschulreife')} Fachhochschulreife &nbsp;
+        ${chk(d.schule.abschluss==='fachgebundene Hochschulreife')} fachgebundene Hochschulreife<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.abschluss==='allgemeine Hochschulreife')} allgemeine Hochschulreife &nbsp;
+        ${chk(d.schule.abschluss==='Abschlusszeugnis (beruflich)')} Abschlusszeugnis (beruflich)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ${chk(d.schule.abschluss&&d.schule.abschluss.startsWith('Sonstiges'))} Sonstiges: ${d.schule.abschluss&&d.schule.abschluss.startsWith('Sonstiges')?d.schule.abschluss.replace('Sonstiges: ',''):'______________________________'}
+      </td>
+    </tr>
+    </tr>
+  </table>
+  <table class="section">
+    <tr>
+      <td colspan="2" style="padding:2pt 5pt;font-size:9pt">
+        <strong>Eintritt in das deutsche Schulsystem / Erstmalige Einschulung in Deutschland am: ${d.schule.einschulung?d.schule.einschulung.split('-').reverse().join('.'):''}   </strong>
+      </td>
+    </tr>
+  </table>
+
+  <!-- AUSBILDUNG -->
+  <table class="section">
+    <tr><td colspan="4" class="section-title">Ausbildung</td></tr>
+    <tr>
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">
+        Anmeldung für eine Ausbildung: &nbsp;
+        ${chk(d.ausbildung.janein==='ja')} Ja &nbsp;&nbsp; ${chk(d.ausbildung.janein==='nein')} Nein
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">Ausbildungsberuf: ${d.ausbildung.beruf||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">
+        ${chk(d.ausbildung.vertragsart==='Ausbildungsvertrag')} Ausbildungsvertrag &nbsp;&nbsp;
+        ${chk(d.ausbildung.vertragsart==='Vorvertrag/Praktikumsvertrag')} Vorvertrag/Praktikumsvertrag
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">Name des Betriebs: ${d.ausbildung.betriebName||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">Straße Hausnummer: ${d.ausbildung.betriebStrasse||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">PLZ Ort: ${d.ausbildung.betriebPlz||''} ${d.ausbildung.betriebOrt||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt;width:50%;border-right:1pt solid #ccc">Telefon: ${d.ausbildung.betriebTel||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Mobil: ${d.ausbildung.betriebMobil||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="4" style="padding:2pt 5pt;font-size:9pt">E-Mail: ${d.ausbildung.betriebEmail||''}</td>
+    </tr>
+  </table>
+  <table class="section">
+    <tr><td colspan="3" class="section-title">Kontaktperson/Ausbilder</td></tr>
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:40%;border-right:1pt solid #ccc">Name: ${d.ausbildung.kontaktName||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Vorname: ${d.ausbildung.kontaktVorname||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt;border-right:1pt solid #ccc">Telefon: ${d.ausbildung.kontaktTel||''}</td>
+      <td style="padding:2pt 5pt;font-size:9pt">Mobil: ${d.ausbildung.kontaktMobil||''}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="2" style="padding:2pt 5pt;font-size:9pt">E-Mail: ${d.ausbildung.kontaktEmail||''}</td>
+    </tr>
+  </table>
+  <table class="section">
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:33%;border-right:1pt solid #ccc">Beginn der Ausbildung: ${d.ausbildung.beginn?d.ausbildung.beginn.split('-').reverse().join('.'):''}   </td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:33%;border-right:1pt solid #ccc">Ende der Ausbildung: ${d.ausbildung.ende?d.ausbildung.ende.split('-').reverse().join('.'):''}   </td>
+      <td style="padding:2pt 5pt;font-size:9pt">Ausbildungsverkürzung: ${chk(d.ausbildung.verkuerzung==='ja')} ja &nbsp; ${chk(d.ausbildung.verkuerzung==='nein')} nein</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td colspan="3" style="padding:2pt 5pt;font-size:9pt">
+        ${chk(d.ausbildung.kammer==='HWK/IHK Karlsruhe')} HWK / IHK Karlsruhe &nbsp;&nbsp;
+        ${chk(d.ausbildung.kammer&&d.ausbildung.kammer!=='HWK/IHK Karlsruhe')} andere HWK / IHK: ${d.ausbildung.kammer&&d.ausbildung.kammer!=='HWK/IHK Karlsruhe'?d.ausbildung.kammer.replace('andere: ',''):'_____________________________'}
+      </td>
+    </tr>
+  </table>
+
+  <!-- ERKLÄRUNG + UNTERSCHRIFTEN -->
+  <table class="section">
+    <tr>
+      <td colspan="2" style="padding:3pt 5pt;font-size:8.5pt">
+        Hiermit versichere ich die Richtigkeit meiner Angaben. Ich bin mir bewusst, dass unrichtige Angaben den Ausschluss von der Schule nach sich ziehen kann und die Nichtigkeit von Prüfungen und Zeugnissen bewirken.
+      </td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:4pt 5pt;font-size:9pt;width:50%;border-right:1pt solid #ccc;vertical-align:top">
+        <div style="font-size:8.5pt;margin-bottom:4pt">Schüler/-in</div>
+        <div style="border-bottom:1pt solid #000;min-height:48pt;padding-bottom:2pt">${sigS}</div>
+        <div style="font-size:7.5pt;color:#555;margin-top:2pt">Ort, Datum, Unterschrift</div>
+      </td>
+      <td style="padding:4pt 5pt;font-size:9pt;vertical-align:top">
+        <div style="font-size:8.5pt;margin-bottom:4pt">Gesetzl. Vertreter/-in</div>
+        <div style="border-bottom:1pt solid #000;min-height:48pt;padding-bottom:2pt">${sigV}</div>
+        <div style="font-size:7.5pt;color:#555;margin-top:2pt">Ort, Datum, Unterschrift</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- DOKUMENTE -->
+  <table class="section">
+    <tr>
+      <td style="padding:2pt 5pt;font-size:9pt;width:55%"></td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:22.5%;text-align:center;border-left:1pt solid #ccc"><strong>fehlend</strong></td>
+      <td style="padding:2pt 5pt;font-size:9pt;width:22.5%;text-align:center;border-left:1pt solid #ccc"><strong>vorhanden</strong></td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">letztes Zeugnis</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(!d.dokumente.zeugnis)}</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(d.dokumente.zeugnis)}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">Ausweiskopie</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(!d.dokumente.ausweis)}</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(d.dokumente.ausweis)}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">1 Passbild</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(!d.dokumente.foto)}</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(d.dokumente.foto)}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">Lebenslauf</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(!d.dokumente.lebenslauf)}</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(d.dokumente.lebenslauf)}</td>
+    </tr>
+    <tr style="border-top:1pt solid #ccc">
+      <td style="padding:2pt 5pt;font-size:9pt">Ausbildungs-/Vor-/Praktikumsvertrag</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(!d.dokumente.vertrag)}</td>
+      <td style="text-align:center;border-left:1pt solid #ccc">${chk(d.dokumente.vertrag)}</td>
+    </tr>
+  </table>
+
+  <div style="font-size:8pt;color:#333;margin-top:4pt;text-align:right">Stand: 07/2025</div>
+
+  <!-- ABSCHLUSS-ZEILEN -->
+  <table class="section" style="margin-top:4pt">
+    <tr>
+      <td style="padding:3pt 5pt;font-size:8.5pt;width:60%;border-right:1pt solid #ccc">
+        Vollständigkeit der Angaben geprüft:<br>
+        <div style="border-bottom:1pt solid #000;min-height:28pt;margin-top:4pt"></div>
+        <span style="font-size:7.5pt">Datum, Unterschrift Klassenlehrer/-in</span>
+      </td>
+      <td style="padding:3pt 5pt;font-size:8.5pt">
+        Daten in EDV eingegeben:<br>
+        <div style="border-bottom:1pt solid #000;min-height:28pt;margin-top:4pt"></div>
+        <span style="font-size:7.5pt">Datum, Unterschrift Sekretariat</span>
+      </td>
+    </tr>
+  </table>
+
+  <table style="width:100%;margin-top:5pt;border-collapse:collapse">
+    <tr>
+      <td style="font-size:7.5pt;color:#333;line-height:1.5;padding-right:10pt;vertical-align:top">
+        <strong>Hinweis:</strong><br>
+        Die auf dem Formular erhobenen Daten werden elektronisch erfasst und gespeichert. Die Erhebung erfolgt ausschließlich zu schulischen Zwecken, Rechtsvorschriften, die zu dieser Auskunft verpflichten sind: §11 Landesdatenschutzgesetz, §36 Landesverwaltungsverfahrensgesetz und §23 Abs. 1 und 2, 72 Schulgesetz.
+      </td>
+    </tr>
+  </table>
+
+  </div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+function exportJSON() {
+  const archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'aks_archiv_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) { alert('Ungültige Datei – kein Array gefunden.'); return; }
+      const existing = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+      const existingIds = new Set(existing.map(d => d.id));
+      // Only add entries that don't already exist (never overwrite)
+      const newEntries = imported.filter(d => !existingIds.has(d.id));
+      const merged = [...existing, ...newEntries].sort((a,b) => b.id - a.id);
+      localStorage.setItem('aks_archive', JSON.stringify(merged));
+      renderArchive();
+      alert(`Import abgeschlossen.\nNeu hinzugefügt: ${newEntries.length} Einträge.\nBereits vorhanden (übersprungen): ${imported.length - newEntries.length} Einträge.\nGesamt: ${merged.length} Einträge.`);
+    } catch(err) {
+      alert('Fehler beim Lesen der Datei: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function exportExcel() {
+  const archive = JSON.parse(localStorage.getItem('aks_archive') || '[]');
+  if (!archive.length) { alert('Keine Einträge vorhanden.'); return; }
+
+  const headers = [
+    'Gespeichert am','Schuljahr','Klasse',
+    'Nachname','Vorname','Geburtsdatum','Geburtsort','Geburtsland','Muttersprache','Staatsangehörigkeit','Geschlecht','Konfession',
+    'Wohnart','Straße','PLZ','Ort','Telefon','Mobil','E-Mail',
+    'Erz. Status','Erz. Art / Ansprechpartner',
+    'Erz.1 Name','Erz.1 Vorname','Erz.1 Geschlecht','Erz.1 Straße','Erz.1 PLZ','Erz.1 Ort','Erz.1 Telefon','Erz.1 Mobil','Erz.1 E-Mail',
+    'Erz.2 Name','Erz.2 Vorname','Erz.2 Geschlecht','Erz.2 Straße','Erz.2 PLZ','Erz.2 Ort','Erz.2 Telefon','Erz.2 Mobil','Erz.2 E-Mail',
+    'AKS-Eintritt','Eintrittsklasse','Letzte Schule','Schulort','Schulart','Schulabschluss','Ersteinschulung',
+    'Ausbildung Ja/Nein','Ausbildungsberuf','Vertragsart',
+    'Betrieb Name','Betrieb Straße','Betrieb PLZ','Betrieb Ort','Betrieb Telefon','Betrieb Mobil','Betrieb E-Mail',
+    'Ausbilder Name','Ausbilder Vorname','Ausbilder Telefon','Ausbilder Mobil','Ausbilder E-Mail',
+    'Ausbildung Beginn','Ausbildung Ende','Verkürzung','Kammer',
+    'Zeugnis','Ausweis','Passbild','Lebenslauf','Vertrag'
+  ];
+
+  function esc(v) {
+    if (v == null) return '';
+    const s = String(v);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"';
+    return s;
+  }
+  function fd(s) { if (!s) return ''; const[y,m,d]=s.split('-'); return (d&&m&&y)?d+'.'+m+'.'+y:s; }
+
+  const rows = archive.map(d => [
+    d.savedAt, d.schuljahr, d.klasse,
+    d.schueler.name, d.schueler.vorname, fd(d.schueler.gebAm), d.schueler.gebOrt, d.schueler.geburtsland, d.schueler.muttersprache, d.schueler.staatsa, d.schueler.geschlecht, d.schueler.konfession,
+    d.anschrift.wohnart, d.anschrift.strasse, d.anschrift.plz, d.anschrift.ort, d.anschrift.tel, d.anschrift.mobil, d.anschrift.email,
+    d.erziehung.status, d.erziehung.status==='volljährig' ? (d.erziehung.anspArt||'') : (d.erziehung.art||''),
+    d.erziehung.e1.name, d.erziehung.e1.vorname, d.erziehung.e1.geschl, d.erziehung.e1.strasse, d.erziehung.e1.plz, d.erziehung.e1.ort, d.erziehung.e1.tel, d.erziehung.e1.mobil, d.erziehung.e1.email,
+    d.erziehung.e2.name, d.erziehung.e2.vorname, d.erziehung.e2.geschl, d.erziehung.e2.strasse, d.erziehung.e2.plz, d.erziehung.e2.ort, d.erziehung.e2.tel, d.erziehung.e2.mobil, d.erziehung.e2.email,
+    fd(d.schule.eintritt), d.schule.klasse, d.schule.name, d.schule.ort, d.schule.art, d.schule.abschluss, fd(d.schule.einschulung),
+    d.ausbildung.janein, d.ausbildung.beruf, d.ausbildung.vertragsart,
+    d.ausbildung.betriebName, d.ausbildung.betriebStrasse, d.ausbildung.betriebPlz, d.ausbildung.betriebOrt, d.ausbildung.betriebTel, d.ausbildung.betriebMobil, d.ausbildung.betriebEmail,
+    d.ausbildung.kontaktName, d.ausbildung.kontaktVorname, d.ausbildung.kontaktTel, d.ausbildung.kontaktMobil, d.ausbildung.kontaktEmail,
+    fd(d.ausbildung.beginn), fd(d.ausbildung.ende), d.ausbildung.verkuerzung, d.ausbildung.kammer,
+    d.dokumente.zeugnis?'ja':'nein', d.dokumente.ausweis?'ja':'nein', d.dokumente.foto?'ja':'nein', d.dokumente.lebenslauf?'ja':'nein', d.dokumente.vertrag?'ja':'nein'
+  ].map(esc));
+
+  const csv = [headers.map(esc).join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'schueleraufnahme_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function fmtDate(s) {
+  if (!s) return '–';
+  const [y, m, d] = s.split('-');
+  if (!y || !m || !d) return s;
+  return `${d}.${m}.${y}`;
+}
+
+// Close overlay on outside click
+document.getElementById('admin-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAdmin();
+});
+</script>
+</body>
+</html>
